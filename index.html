@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html class="html">
+<head>
+  <title>Facebook Share Boost</title>
+  <link rel="icon" href="https://i.imgur.com/97c1hdK.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fjalla+One|Libre+Baskerville">
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
+  <style>
+    .html {
+      max-height: 100%;
+      max-width: 100%
+    }
+    .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    box-sizing: border-box;
+    background-color: #1877F2;
+    border-radius: 2rem;
+    }
+    .h1 {
+    font-family: 'Fjalla One',   sans-serif;
+    font-size: 30px;  
+    }
+    .label {
+    font-family: 'Fjalla One', sans-serif;
+    color: #FFFFFF;
+    }
+    .button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    }
+    .button:hover {
+    background-color: #3e8e41;
+    }
+    .a {
+    color: #FFFFFF;
+    text-decoration: none;
+    }
+    .input {
+    background-color: #FFFFFF;
+    border-radius: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #CCCCCC;
+    }
+    .note {
+    color: #FFFFFF;
+    font-size: 10px;  
+    font-family: 'Fjalla One',   sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <center><h1 class="h1">Facebook Share Boost</h1>
+  <div class="container">
+          <label class="label" for="token">Access Token:</label><br>
+    <input class="input" type="text" id="token" name="token" value=""><br><br>
+    <label class="label" for="url">Share URL:</label><br>
+    <input class="input" type="text" id="url" name="url" value=""><br>
+    <p class="label" id="share-count">Shared Count: 0</p><br>
+      <button class="button" id="run-btn">Run</button>
+    <button class="button" id="stop-btn" disabled>Stop</button><br><br><button class="button"><a  class="a" href="https://facebook-appstate-token-getter.onlitegix.com/">Get Token</a></button>
+    <br><br><p class="note">Note: Use a dummy account when getting exchange token.</p>
+    </center>
+  </div>
+  <script>
+        const tokenInput = document.getElementById('token');
+    const urlInput = document.getElementById('url');
+    const runBtn = document.getElementById('run-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const shareCountElement = document.getElementById('share-count');
+
+    let sharedCount = 0;
+    let timer = null;
+
+    runBtn.addEventListener('click', () => {
+
+      const accessToken = tokenInput.value;
+      const shareUrl = urlInput.value;
+      
+      startSharing(accessToken, shareUrl);
+    });
+
+    stopBtn.addEventListener('click', () => {
+      stopSharing();
+    });
+    
+    function startSharing(accessToken, shareUrl) {
+      
+      timer = setInterval(() => {
+        sharePost(accessToken, shareUrl);
+        sharedCount++;
+        shareCountElement.textContent = `Shared Count: ${sharedCount}`;
+      }, 1500);
+      runBtn.disabled = true;
+      stopBtn.disabled = false;
+    }
+
+    function stopSharing() {
+      clearInterval(timer);
+      runBtn.disabled = false;
+      stopBtn.disabled = true;
+    }
+
+    async function sharePost(accessToken, shareUrl) {
+      try {
+        const response = await axios.post(
+          `https://graph.facebook.com/me/feed?access_token=${accessToken}&fields=id&limit=1&published=0`,
+          {
+            link: shareUrl,
+            privacy: { value: 'SELF' },
+            no_story: true,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (response && response.data) {
+          console.log(`Post shared: ${sharedCount}`);
+          console.log(`Post ID: ${response.data.id || 'Unknown'}`);
+        } else {
+          console.log('Failed to share post:', response);
+        }
+      } catch (error) {
+        console.error('Failed to share post:', error);
+      }
+          }
+  </script>
+</body>
+</html>
